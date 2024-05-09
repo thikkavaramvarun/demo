@@ -1,118 +1,50 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { View, Text, SafeAreaView, ScrollView } from 'react-native'
+import React, { useState,useCallback} from 'react'
+import User from './src/Components/User'
+import CardList from './src/Components/CardList'
+import Search from './src/Components/Search'
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+export type Data = {
+  avatar_url : string
+  followers :string | number
+  following : string | number
+  login:string
+  public_repos : string | number
 }
+const App = () => {
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const [data,setData] = useState<Data>();
 
+
+  const search = useCallback((searchItem : string)=>{
+    console.log(searchItem,"searchItem");    
+    if (searchItem == ""){
+        alert("Please enter something");
+        return
+      }
+    fetch(`https://api.github.com/users/${searchItem}`).then(res=>res.json()).then(data =>{
+      console.log(data);
+      setData(data)      
+    })
+  },[])
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
+    // <View className="bg-black w-full h-full">
+    //   <Text className='text-white text-bold text-xl border-4 border-green-600'>App</Text>
+    // </View>
+    <SafeAreaView className='bg-slate-100 h-full w-full'>
+      <ScrollView keyboardShouldPersistTaps='handled' className='h-screen p-4 mx-auto'>
+        <Search onSearch={search }/>
+        {
+          data && (<><User src={data.avatar_url} username={data.login}/>
+            <CardList data={data} /></>)
+        }
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
-export default App;
+export default App
